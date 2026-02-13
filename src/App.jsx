@@ -4,7 +4,6 @@ import Menu from "./pages/menu";
 import Dashboard from "./pages/Dashboard";
 import MenuManagement from "./pages/MenuManagement";
 import Orders from "./pages/Orders";
-import Settings from "./pages/Settings";
 
 
 export default function App() {
@@ -22,7 +21,7 @@ export default function App() {
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/menu-management" element={<MenuManagement />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/settings" element={<Settings />} />
+         
 
 
       </Routes>
