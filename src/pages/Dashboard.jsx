@@ -21,15 +21,28 @@ export default function Dashboard() {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [onlineTotal, setOnlineTotal] = useState(0);
   const [cashTotal, setCashTotal] = useState(0);
+  const [mode, setMode] = useState("today"); // 🔥 today / 15days
 
-  // 🔥 REALTIME EMAIL WISE DATA
+  // 🔥 REALTIME EMAIL + DATE FILTER
   useEffect(() => {
 
     if (!auth.currentUser) return;
 
+    const now = new Date();
+    let startDate;
+
+    if (mode === "today") {
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+    } else {
+      startDate = new Date();
+      startDate.setDate(now.getDate() - 15);
+    }
+
     const q = query(
       collection(db, "orders"),
-      where("userEmail", "==", auth.currentUser.email)
+      where("userEmail", "==", auth.currentUser.email),
+      where("createdAt", ">=", startDate)
     );
 
     const unsub = onSnapshot(q, (snapshot) => {
@@ -58,7 +71,7 @@ export default function Dashboard() {
 
     return () => unsub();
 
-  }, []);
+  }, [mode]);
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -83,8 +96,6 @@ export default function Dashboard() {
           >
             Orders
           </p>
-
-        
         </div>
 
         <div className="mt-20 opacity-80">
@@ -104,11 +115,30 @@ export default function Dashboard() {
 
         <button
           onClick={() => navigate("/menu")}
-          className="bg-red-500 text-white px-5 py-2 rounded-lg mb-6"
+          className="bg-red-500 text-white px-5 py-2 rounded-lg mb-4"
         >
           Go To Menu
         </button>
 
+        {/* 🔥 FILTER BUTTONS */}
+        <div className="flex gap-3 mb-6">
+          <button
+            onClick={() => setMode("today")}
+            className={`px-5 py-2 rounded-lg mb-6 ml-3 ${mode === "today" ? "bg-red-500 text-white" : "bg-white"
+              }`}
+          >
+            Today
+          </button>
+
+          <button
+            onClick={() => navigate("/last15days")}
+            className="bg-red-500 text-white px-5 py-2 rounded-lg mb-6 ml-3"
+          >
+            Last 15 Days Page
+          </button>
+        </div>
+
+        {/* 🔥 STATS */}
         <div className="grid grid-cols-2 gap-6 mb-8">
 
           <div className="bg-white p-6 rounded-xl shadow">
@@ -118,17 +148,18 @@ export default function Dashboard() {
 
           <div className="bg-white p-6 rounded-xl shadow">
             <p className="text-gray-500">Total Revenue</p>
-            <h2 className="text-3xl font-bold">{totalRevenue.toFixed(2)}</h2>
+            <h2 className="text-3xl font-bold">₹{totalRevenue.toFixed(2)}</h2>
           </div>
 
         </div>
 
+        {/* 🔥 PAYMENT BOXES */}
         <div className="grid grid-cols-2 gap-6">
 
           <div className="bg-white p-6 rounded-xl shadow">
             <p className="text-gray-500">Online Payments</p>
             <h2 className="text-3xl font-bold text-green-500">
-              ${onlineTotal.toFixed(2)}
+              ₹{onlineTotal.toFixed(2)}
             </h2>
             <p className="text-sm text-gray-400 mt-2">
               {orders.filter(o => o.payment === "Online").length} Orders Paid Online
@@ -138,7 +169,7 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded-xl shadow">
             <p className="text-gray-500">Cash Payments</p>
             <h2 className="text-3xl font-bold text-orange-500">
-              ${cashTotal.toFixed(2)}
+              ₹{cashTotal.toFixed(2)}
             </h2>
             <p className="text-sm text-gray-400 mt-2">
               {orders.filter(o => o.payment === "Cash").length} Orders Paid Cash
